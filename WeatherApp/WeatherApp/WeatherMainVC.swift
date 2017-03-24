@@ -18,10 +18,19 @@ class WeatherMainVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     @IBOutlet weak var currentWeatherTypeLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     
+    var currentWeather: CurrentWeather!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
+        currentWeather = CurrentWeather()
+        
+        currentWeather.downloadWeatherDetails{
+            print("Downloading")
+            self.updateMainUI()
+            
+        }
     }
 
     
@@ -39,6 +48,16 @@ class WeatherMainVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
         return cell
     }
     
-    //End
+    func updateMainUI(){
+        print("UDATE UI")
+        dateLabel.text = currentWeather.date
+        currentTempLabel.text = "\(currentWeather.currentTemp)"
+        currentWeatherTypeLabel.text = currentWeather.weatherType
+        locationLabel.text  = currentWeather.cityName
+        currentWeatherImage.image = UIImage(named:currentWeather.weatherType)
+        
+        
+    }
+    
 }
 
