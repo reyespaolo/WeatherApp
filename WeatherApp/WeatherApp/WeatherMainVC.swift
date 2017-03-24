@@ -8,8 +8,9 @@
 
 import UIKit
 import Alamofire
+import CoreLocation
 
-class WeatherMainVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class WeatherMainVC: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate {
     
     
     @IBOutlet weak var dateLabel: UILabel!
@@ -18,6 +19,10 @@ class WeatherMainVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
     @IBOutlet weak var currentWeatherImage: UIImageView!
     @IBOutlet weak var currentWeatherTypeLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
+    
+    let LocationManager = CLLocationManager()
+    var currentLocation:CLLocation!
+    
     
     var currentWeather: CurrentWeather!
     var forecast: Forecast!
@@ -28,13 +33,36 @@ class WeatherMainVC: UIViewController, UITableViewDelegate, UITableViewDataSourc
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
+        LocationManager.delegate = self
+        LocationManager.desiredAccuracy = kCLLocationAccuracyBest
+        LocationManager.requestWhenInUseAuthorization()
+        
         currentWeather = CurrentWeather()
         
-        currentWeather.downloadWeatherDetails{
-            self.downloadForecastData {
-                self.updateMainUI()
-            }
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        locationAuthStatus()
+
+    }
+    
+    func locationAuthStatus(){
+        if CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
+            currentLocation = LocationManager.location
             
+                Location.sharedInstance.latitude = currentLocation.coordinate.latitude
+                Location.sharedInstance.longitude = currentLocation.coordinate.longitude
+                currentWeather.downloadWeatherDetails{
+                    self.downloadForecastData {
+                        self.updateMainUI()
+                    }
+                }
+            
+        }else{
+            LocationManager.requestWhenInUseAuthorization()
+            locationAuthStatus()
         }
     }
 
